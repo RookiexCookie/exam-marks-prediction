@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam Marks Prediction • ML Academic Intelligence</title>
+  <meta name="description" content="Predict student examination marks using machine learning regression models. Analyze study habits, attendance, and performance data.">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand-wrapper">
+      <div class="brand-icon">🎓</div>
+      <div>
+        <div class="brand-title">Marks AI</div>
+        <div class="brand-tag">Academic ML</div>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a class="nav-item active" data-view="view-overview">
+        <span class="icon">📊</span>
+        <span>Overview</span>
+      </a>
+      <a class="nav-item" data-view="view-predict">
+        <span class="icon">🔮</span>
+        <span>Predict</span>
+      </a>
+      <a class="nav-item" data-view="view-planner">
+        <span class="icon">🎯</span>
+        <span>Goal Planner</span>
+      </a>
+      <a class="nav-item" data-view="view-training">
+        <span class="icon">⚙️</span>
+        <span>Training</span>
+      </a>
+      <a class="nav-item" data-view="view-insights">
+        <span class="icon">💡</span>
+        <span>Insights</span>
+      </a>
+      <a class="nav-item" data-view="view-data">
+        <span class="icon">📁</span>
+        <span>Dataset</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div>Active Model</div>
+      <div class="model-badge-chip">
+        <span id="sb-active-model">Linear Reg.</span>
+        <span style="color: #10B981;" id="sb-active-r2">R² 0.94</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="app-main">
+    <header class="top-header">
+      <div class="header-left">
+        <h1 id="page-title">Overview Dashboard</h1>
+      </div>
+      <div class="header-right">
+        <label for="model-select" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">Model:</label>
+        <select id="model-select" class="engine-selector">
+          <option value="Linear Regression" selected>Linear Regression</option>
+          <option value="Ridge Regression">Ridge Regression (L2)</option>
+          <option value="Random Forest Regressor">Random Forest</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- VIEW 1: OVERVIEW -->
+    <section id="view-overview" class="view-container active">
+      <div class="section-head">
+        <h2>Student Performance Overview</h2>
+        <p>Cohort analytics on study habits, attendance trends, and continuous assessments.</p>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Cohort Size</div>
+          <div class="kpi-value" id="kpi-cohort-size">600</div>
+          <div class="kpi-sub">Total records</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Mean Score</div>
+          <div class="kpi-value" id="kpi-mean-score">72.4</div>
+          <div class="kpi-sub">Out of 100</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Pass Rate</div>
+          <div class="kpi-value" id="kpi-pass-rate">94.2%</div>
+          <div class="kpi-sub">&ge; 40 marks</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Avg Study</div>
+          <div class="kpi-value" id="kpi-study-hours">4.6h</div>
+          <div class="kpi-sub">Per day</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Attendance</div>
+          <div class="kpi-value" id="kpi-attendance">81.5%</div>
+          <div class="kpi-sub">Lecture rate</div>
+        </div>
+      </div>
+
+      <div class="charts-grid-2">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">Exam Marks Distribution</span>
+            <span class="chart-badge">Histogram</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-marks-dist"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">Study Hours vs Exam Marks</span>
+            <span class="chart-badge">Scatter</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-study-scatter"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="charts-grid-2">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">Attendance vs Score Bracket</span>
+            <span class="chart-badge">Category Mean</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-attendance-bracket"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">Feature Correlations</span>
+            <span class="chart-badge">Pearson r</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-correlation-bar"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: PREDICT -->
+    <section id="view-predict" class="view-container">
+      <div class="section-head">
+        <h2>Predict Examination Marks</h2>
+        <p>Adjust academic parameters to compute expected marks, confidence bounds, and grade.</p>
+      </div>
+
+      <div class="predict-layout">
+        <div class="predict-form-card">
+          <div class="preset-pills">
+            <button class="preset-btn" id="preset-topper">💡 Topper</button>
+            <button class="preset-btn" id="preset-average">⚡ Average</button>
+            <button class="preset-btn" id="preset-atrisk">⚠️ At-Risk</button>
+          </div>
+
+          <div class="input-group">
+            <div class="input-header">
+              <span class="input-label">Daily Study Hours</span>
+              <span class="input-val-display" id="val-study-hours">4.5 hrs</span>
+            </div>
+            <input type="range" class="range-slider" id="input-study-hours" min="0.5" max="14.0" step="0.5" value="4.5">
+          </div>
+
+          <div class="input-group">
+            <div class="input-header">
+              <span class="input-label">Attendance Percentage</span>
+              <span class="input-val-display" id="val-attendance">82 %</span>
+            </div>
+            <input type="range" class="range-slider" id="input-attendance" min="40" max="100" step="1" value="82">
+          </div>
+
+          <div class="input-group">
+            <div class="input-header">
+              <span class="input-label">Assignment Score</span>
+              <span class="input-val-display" id="val-assignment">78</span>
+            </div>
+            <input type="range" class="range-slider" id="input-assignment" min="20" max="100" step="1" value="78">
+          </div>
+
+          <div class="input-group">
+            <div class="input-header">
+              <span class="input-label">Previous Exam Marks</span>
+              <span class="input-val-display" id="val-previous">72</span>
+            </div>
+            <input type="range" class="range-slider" id="input-previous" min="20" max="100" step="1" value="72">
+          </div>
+
+          <div class="input-group">
+            <div class="input-header">
+              <span class="input-label">Internal Assessment</span>
+              <span class="input-val-display" id="val-internal">38 /50</span>
+            </div>
+            <input type="range" class="range-slider" id="input-internal" min="10" max="50" step="1" value="38">
+          </div>
+
+          <div class="input-group">
+            <div class="input-header">
+              <span class="input-label">Study Days Left</span>
+              <span class="input-val-display" id="val-days">35 days</span>
+            </div>
+            <input type="range" class="range-slider" id="input-days" min="5" max="90" step="1" value="35">
+          </div>
+        </div>
+
+        <div>
+          <div class="predict-result-card">
+            <div class="score-display-lead">Expected Exam Score</div>
+            <div class="score-huge">
+              <span id="res-score">76.8</span><span class="score-max-tag">/100</span>
+            </div>
+
+            <div class="grade-badge" id="res-grade-pill" style="background: rgba(16, 185, 129, 0.1); color: #10B981; border: 1px solid #10B981;">
+              Grade A &bull; First Class
+            </div>
+
+            <div class="interval-chip" id="res-interval">
+              🎯 <strong>95% Interval:</strong> 71.2 &mdash; 82.4 Marks (&plusmn;5.6)
+            </div>
+
+            <div class="benchmark-bar" id="res-benchmark">
+              📊 <strong>Benchmark:</strong> +4.4 marks above cohort mean (72.4).
+            </div>
+          </div>
+
+          <div class="recs-container" id="recs-container">
+            <!-- Populated via app.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: GOAL PLANNER -->
+    <section id="view-planner" class="view-container">
+      <div class="section-head">
+        <h2>Target Marks Goal Planner</h2>
+        <p>Set a target score to calculate required study hours or attendance boost.</p>
+      </div>
+
+      <div class="predict-layout">
+        <div class="predict-form-card">
+          <div class="input-group" style="margin-bottom: 1.5rem;">
+            <div class="input-header">
+              <span class="input-label" style="color: var(--accent-blue); font-weight: 700;">Desired Target Mark</span>
+              <span class="input-val-display" id="val-target-goal" style="font-size: 0.9rem;">85 / 100</span>
+            </div>
+            <input type="range" class="range-slider" id="input-target-goal" min="40" max="100" step="1" value="85">
+          </div>
+
+          <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em;">
+            Your Current Baseline
+          </div>
+
+          <div class="input-group">
+            <div class="input-header">
+              <span class="input-label">Current Study Time</span>
+              <span class="input-val-display" id="val-goal-curr-hrs">4.0 hrs/day</span>
+            </div>
+            <input type="range" class="range-slider" id="input-goal-curr-hrs" min="0.5" max="12.0" step="0.5" value="4.0">
+          </div>
+
+          <div class="input-group">
+            <div class="input-header">
+              <span class="input-label">Current Attendance</span>
+              <span class="input-val-display" id="val-goal-curr-att">78 %</span>
+            </div>
+            <input type="range" class="range-slider" id="input-goal-curr-att" min="40" max="100" step="1" value="78">
+          </div>
+        </div>
+
+        <div>
+          <div class="predict-result-card" style="text-align: left; align-items: flex-start;">
+            <div class="score-display-lead" style="margin-bottom: 0.5rem;">Target Gap Analysis</div>
+            <div style="display: flex; gap: 2rem; width: 100%; margin-bottom: 1rem;">
+              <div>
+                <div class="gap-stat-label">Current Estimate</div>
+                <div class="gap-stat-value" id="goal-curr-pred">73.2</div>
+              </div>
+              <div>
+                <div class="gap-stat-label">Target Goal</div>
+                <div class="gap-stat-value" style="color: var(--accent-blue);" id="goal-target-display">85.0</div>
+              </div>
+              <div>
+                <div class="gap-stat-label">Required Gap</div>
+                <div class="gap-stat-value" style="color: var(--accent-amber);" id="goal-gap-display">+11.8</div>
+              </div>
+            </div>
+
+            <div id="goal-solution-box" style="width: 100%; background: var(--bg-muted); border-radius: var(--radius-sm); padding: 0.85rem; font-size: 0.78rem; line-height: 1.6; color: var(--text-secondary);">
+              <!-- Populated via app.js -->
+            </div>
+          </div>
+
+          <div class="chart-card" style="margin-top: 0.75rem;">
+            <div class="chart-card-header">
+              <span class="chart-title">Study Hours Sensitivity Curve</span>
+              <span class="chart-badge">Impact</span>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chart-sensitivity-curve"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: MODEL TRAINING -->
+    <section id="view-training" class="view-container">
+      <div class="section-head">
+        <h2>Model Training &amp; Leaderboard</h2>
+        <p>Regression algorithm comparison on identical test splits.</p>
+      </div>
+
+      <div class="data-table-wrapper" style="margin-bottom: 1rem;">
+        <table class="data-table" id="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>R² Score</th>
+              <th>RMSE</th>
+              <th>MAE</th>
+              <th>MSE</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <!-- Populated via app.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="charts-grid-2">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">Actual vs Predicted</span>
+            <span class="chart-badge">y = x Line</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-actual-vs-pred"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">Prediction Residuals</span>
+            <span class="chart-badge">Error Distribution</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-residuals"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: INSIGHTS -->
+    <section id="view-insights" class="view-container">
+      <div class="section-head">
+        <h2>Statistical Insights &amp; Factor Weights</h2>
+        <p>Feature importance analysis and diagnostic report generation.</p>
+      </div>
+
+      <div class="charts-grid-2">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">Feature Importance (%)</span>
+            <span class="chart-badge">Weights</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-feature-importance"></canvas>
+          </div>
+        </div>
+
+        <div class="predict-form-card">
+          <h3 style="font-size: 0.88rem; margin-bottom: 0.75rem; font-weight: 700;">📑 Student Diagnostic Report</h3>
+          <div class="input-group">
+            <label class="input-label">Student Name / Roll No.</label>
+            <input type="text" id="report-name" class="engine-selector" style="width: 100%; margin-top: 0.25rem;" value="Alex Smith (STU1042)">
+          </div>
+          <p style="font-size: 0.74rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem;">
+            Generates an academic action report with score projections, confidence intervals, grade bracket, and recommendations.
+          </p>
+          <button class="btn-primary" id="btn-download-report" style="width: 100%;">
+            📥 Download Report (.txt)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 6: DATASET EXPLORER -->
+    <section id="view-data" class="view-container">
+      <div class="section-head" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2>Dataset Explorer</h2>
+          <p>Browse raw records, search by ID, and export data.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn-secondary" id="btn-export-csv">📥 Export CSV</button>
+          <button class="btn-secondary" id="btn-regenerate-data">🔄 Reset</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 0.75rem;">
+        <input type="text" id="data-search" class="engine-selector" style="width: 320px;" placeholder="🔍 Search by Student ID...">
+      </div>
+
+      <div class="data-table-wrapper" style="max-height: 400px; overflow-y: auto;">
+        <table class="data-table" id="dataset-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Study Hours</th>
+              <th>Attendance %</th>
+              <th>Assignment</th>
+              <th>Prev Exam</th>
+              <th>Internal</th>
+              <th>Prep Days</th>
+              <th>Exam Marks</th>
+            </tr>
+          </thead>
+          <tbody id="dataset-body">
+            <!-- Populated via app.js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Application Logic -->
+  <script src="data.js"></script>
+  <script src="ml_engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

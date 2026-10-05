@@ -1,0 +1,23 @@
+# Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database
+*.db-journal
+
+# Logs & temp
+*.log
+.tempmediaStorage/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

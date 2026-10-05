@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam Marks Predictor • Analytics Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="dashboard-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">MarksAI</div>
+          <div class="brand-sub">Academic Predictor</div>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-btn active" data-tab="tab-dashboard">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-btn" data-tab="tab-analysis">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>Analysis</span>
+        </button>
+        <button class="nav-btn" data-tab="tab-model">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>ML Models</span>
+        </button>
+        <button class="nav-btn" data-tab="tab-history">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+          <span>History</span>
+        </button>
+        <button class="nav-btn" data-tab="tab-about">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>About ML</span>
+        </button>
+      </nav>
+
+      <!-- Compact Model Status -->
+      <div class="sidebar-model-compact">
+        <span class="smc-tag">MODEL</span>
+        <div class="smc-name" id="sb-best-model">Linear Regression</div>
+        <div class="smc-stats">
+          <span>R² <strong id="sb-best-r2">0.923</strong></span> &bull; 
+          <span>RMSE <strong id="sb-best-rmse">3.10</strong></span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div>
+          <h1 class="page-heading" id="page-title">Exam Marks Predictor</h1>
+        </div>
+        <div class="date-badge">Academic Term 2026</div>
+      </header>
+
+      <!-- ============================================== -->
+      <!-- TAB 1: DASHBOARD -->
+      <!-- ============================================== -->
+      <section id="tab-dashboard" class="content-tab active">
+        <!-- 4 COMPACT KPI CARDS -->
+        <div class="kpi-strip">
+          <div class="kpi-box">
+            <span class="kpi-label">Study Time</span>
+            <div class="kpi-val" id="kpi-study-hours">4.5 <span class="kpi-unit">hrs/day</span></div>
+          </div>
+          <div class="kpi-box">
+            <span class="kpi-label">Attendance</span>
+            <div class="kpi-val" id="kpi-attendance">86<span class="kpi-unit">%</span></div>
+          </div>
+          <div class="kpi-box">
+            <span class="kpi-label">Assignments</span>
+            <div class="kpi-val" id="kpi-assignment">78<span class="kpi-unit">%</span></div>
+          </div>
+          <div class="kpi-box">
+            <span class="kpi-label">Previous Exam</span>
+            <div class="kpi-val" id="kpi-prev-exam">72 <span class="kpi-unit">marks</span></div>
+          </div>
+        </div>
+
+        <!-- MAIN 2-COLUMN PREDICTION ROW -->
+        <div class="main-grid-row">
+          <!-- LEFT: Student Inputs -->
+          <div class="card card-inputs">
+            <div class="card-head-compact">
+              <h2 class="card-head-title">Student Inputs</h2>
+              <div class="preset-group">
+                <button class="preset-pill" id="btn-preset-topper">Topper</button>
+                <button class="preset-pill" id="btn-preset-avg">Average</button>
+                <button class="preset-pill" id="btn-preset-risk">At-Risk</button>
+              </div>
+            </div>
+
+            <form id="prediction-form" onsubmit="return false;">
+              <!-- Study Time -->
+              <div class="input-row">
+                <div class="input-meta">
+                  <label for="input-study-hours">Study Time</label>
+                  <span class="input-val-tag" id="display-study-hours">4.5 hrs/day</span>
+                </div>
+                <div class="slider-control">
+                  <input type="range" class="slider" id="input-study-hours" min="0.5" max="14.0" step="0.5" value="4.5">
+                  <input type="number" class="num-box" id="num-study-hours" min="0.5" max="14.0" step="0.5" value="4.5">
+                </div>
+              </div>
+
+              <!-- Attendance -->
+              <div class="input-row">
+                <div class="input-meta">
+                  <label for="input-attendance">Attendance</label>
+                  <span class="input-val-tag" id="display-attendance">86%</span>
+                </div>
+                <div class="slider-control">
+                  <input type="range" class="slider" id="input-attendance" min="40" max="100" step="1" value="86">
+                  <input type="number" class="num-box" id="num-attendance" min="40" max="100" step="1" value="86">
+                </div>
+              </div>
+
+              <!-- Assignment Average -->
+              <div class="input-row">
+                <div class="input-meta">
+                  <label for="input-assignment">Assignment Average</label>
+                  <span class="input-val-tag" id="display-assignment">78%</span>
+                </div>
+                <div class="slider-control">
+                  <input type="range" class="slider" id="input-assignment" min="20" max="100" step="1" value="78">
+                  <input type="number" class="num-box" id="num-assignment" min="20" max="100" step="1" value="78">
+                </div>
+              </div>
+
+              <!-- Previous Exam -->
+              <div class="input-row">
+                <div class="input-meta">
+                  <label for="input-prev-exam">Previous Exam</label>
+                  <span class="input-val-tag" id="display-prev-exam">72</span>
+                </div>
+                <div class="slider-control">
+                  <input type="range" class="slider" id="input-prev-exam" min="20" max="100" step="1" value="72">
+                  <input type="number" class="num-box" id="num-prev-exam" min="20" max="100" step="1" value="72">
+                </div>
+              </div>
+
+              <!-- Mock Test (Optional) -->
+              <div class="input-row">
+                <div class="input-meta">
+                  <label for="input-mock-test">Mock Test <span class="tag-opt">optional</span></label>
+                  <span class="input-val-tag" id="display-mock-test">75</span>
+                </div>
+                <div class="slider-control">
+                  <input type="range" class="slider" id="input-mock-test" min="20" max="100" step="1" value="75">
+                  <input type="number" class="num-box" id="num-mock-test" min="20" max="100" step="1" value="75">
+                </div>
+              </div>
+
+              <button type="button" class="btn-primary-compact" id="btn-predict">
+                Predict Marks
+              </button>
+            </form>
+          </div>
+
+          <!-- RIGHT: Prediction Result -->
+          <div class="card card-result">
+            <div class="card-head-compact">
+              <span class="score-overline">EXPECTED SCORE</span>
+              <span class="badge-grade" id="res-grade-pill">Grade B+</span>
+            </div>
+
+            <!-- Major Number -->
+            <div class="score-headline">
+              <span class="score-major" id="res-predicted-marks">73.1</span>
+              <span class="score-denom">/ 100</span>
+            </div>
+
+            <!-- Single Line Range & Standing -->
+            <div class="score-range-row">
+              <span class="range-text" id="res-prediction-range">67–79 expected range</span>
+              <span class="range-dot">&bull;</span>
+              <span class="perf-text" id="res-perf-badge">Good</span>
+            </div>
+
+            <!-- Compact Progress Indicator -->
+            <div class="compact-score-track">
+              <div class="compact-score-fill" id="compact-score-fill" style="width: 73.1%;"></div>
+            </div>
+
+            <!-- Single Benchmark Supporting Line -->
+            <div class="benchmark-compact" id="res-benchmark-note">
+              <strong>+0.7</strong> vs class average (72.4)
+            </div>
+          </div>
+        </div>
+
+        <!-- SECOND ROW: WHAT-IF & FEATURE IMPORTANCE SIDE-BY-SIDE -->
+        <div class="second-grid-row">
+          <!-- WHAT IF SECTION -->
+          <div class="card card-whatif">
+            <div class="card-head-compact">
+              <div>
+                <h3 class="card-head-title">What If?</h3>
+                <span class="card-sub-compact">Adjust inputs and compare the estimate.</span>
+              </div>
+              <span class="delta-pill" id="whatif-delta-badge">+5.0 marks</span>
+            </div>
+
+            <div class="whatif-controls">
+              <!-- What-If Hours -->
+              <div class="whatif-item">
+                <div class="whatif-item-head">
+                  <span>Study Time</span>
+                  <strong class="whatif-dyn-val" id="whatif-disp-hours">4.5 &rarr; 6.5 hrs</strong>
+                </div>
+                <input type="range" class="slider" id="whatif-slider-hours" min="0.5" max="14.0" step="0.5" value="6.5">
+              </div>
+
+              <!-- What-If Attendance -->
+              <div class="whatif-item">
+                <div class="whatif-item-head">
+                  <span>Attendance</span>
+                  <strong class="whatif-dyn-val" id="whatif-disp-att">86% &rarr; 92%</strong>
+                </div>
+                <input type="range" class="slider" id="whatif-slider-att" min="40" max="100" step="1" value="92">
+              </div>
+
+              <!-- Compact Comparison Display -->
+              <div class="whatif-compare-box">
+                <span class="compare-val" id="whatif-base-score">73.1</span>
+                <span class="compare-arrow">&rarr;</span>
+                <span class="compare-val sim" id="whatif-sim-score">78.1</span>
+              </div>
+            </div>
+
+            <div class="whatif-disclaimer-compact">Model estimate, not a guarantee.</div>
+          </div>
+
+          <!-- FEATURE IMPORTANCE SECTION -->
+          <div class="card card-factors">
+            <div class="card-head-compact">
+              <h3 class="card-head-title">Feature Importance</h3>
+              <span class="card-sub-compact" id="importance-method-tag">Model Weights</span>
+            </div>
+
+            <div class="factors-compact-list" id="factors-list">
+              <!-- Populated dynamically via API -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 2: ANALYSIS -->
+      <!-- ============================================== -->
+      <section id="tab-analysis" class="content-tab">
+        <div class="charts-2col-grid">
+          <div class="card chart-box">
+            <h3 class="chart-box-title">Exam Marks Distribution</h3>
+            <div class="chart-canvas-container">
+              <canvas id="chart-exam-dist"></canvas>
+            </div>
+          </div>
+          <div class="card chart-box">
+            <h3 class="chart-box-title">Study Time vs. Marks</h3>
+            <div class="chart-canvas-container">
+              <canvas id="chart-study-scatter"></canvas>
+            </div>
+          </div>
+          <div class="card chart-box">
+            <h3 class="chart-box-title">Attendance vs. Marks</h3>
+            <div class="chart-canvas-container">
+              <canvas id="chart-att-scatter"></canvas>
+            </div>
+          </div>
+          <div class="card chart-box">
+            <h3 class="chart-box-title">Previous Exam vs. Marks</h3>
+            <div class="chart-canvas-container">
+              <canvas id="chart-prev-scatter"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 14px;">
+          <h3 class="chart-box-title" style="margin-bottom: 10px;">Descriptive Statistics</h3>
+          <div class="table-wrapper">
+            <table class="clean-table" id="table-summary-stats">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>Mean</th>
+                  <th>Std</th>
+                  <th>Min</th>
+                  <th>25%</th>
+                  <th>50%</th>
+                  <th>75%</th>
+                  <th>Max</th>
+                </tr>
+              </thead>
+              <tbody id="stats-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 3: ML MODELS -->
+      <!-- ============================================== -->
+      <section id="tab-model" class="content-tab">
+        <div class="card" style="margin-bottom: 14px;">
+          <div class="card-head-compact">
+            <h3 class="card-head-title">Model Comparison</h3>
+            <span class="card-sub-compact">Holdout Test Set (20%)</span>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="clean-table">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>MAE</th>
+                  <th>MSE</th>
+                  <th>RMSE</th>
+                  <th>R²</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card chart-box">
+          <h3 class="chart-box-title">Actual vs. Predicted Marks</h3>
+          <div class="chart-canvas-container" style="height: 260px;">
+            <canvas id="chart-actual-pred"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 4: HISTORY -->
+      <!-- ============================================== -->
+      <section id="tab-history" class="content-tab">
+        <div class="card">
+          <div class="card-head-compact" style="margin-bottom: 10px;">
+            <h3 class="card-head-title">Prediction History</h3>
+            <button class="btn-clear-compact" id="btn-clear-history">Clear History</button>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="clean-table" id="history-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Study</th>
+                  <th>Attendance</th>
+                  <th>Assignments</th>
+                  <th>Prev Exam</th>
+                  <th>Mock Test</th>
+                  <th>Predicted</th>
+                  <th>Range</th>
+                  <th>Level</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 5: ABOUT ML -->
+      <!-- ============================================== -->
+      <section id="tab-about" class="content-tab">
+        <div class="card" style="font-size: 0.85rem; line-height: 1.6; color: #334155;">
+          <h3 style="color: #0F172A; margin-bottom: 8px;">Pipeline Architecture</h3>
+          <p>Features are scaled via <code>StandardScaler</code> fit only on the 80% training split. Predictions clamp to $[0, 100]$.</p>
+          <p style="margin-top: 8px;"><strong>Prediction Interval:</strong> $\hat{y} \pm 1.96 \times \text{RMSE}$ computed on holdout validation.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
